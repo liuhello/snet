@@ -11,3 +11,6 @@ typedef     unsigned long long  suint64;
 #ifndef NULL
 #define NULL 0
 #endif
+
+
+#define     PING_CODE           1
