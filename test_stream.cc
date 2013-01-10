@@ -12,7 +12,7 @@ int main(int argc,char** argv)
     os.writeShort(2);
     os.writeInt(3);
     os.writeLong(4);
-    os.writeLong(1111111114);
+    os.writeLong(11111111114l);
     sint8 i8;
     sint16 i16;
     sint32 i32;
@@ -27,7 +27,7 @@ int main(int argc,char** argv)
     is.readLong(i64);
     assert(i64 == 4);
     is.readLong(i64);
-    assert(i64 == 1111111114);
+    assert(i64 == 11111111114l);
     return 0;
 }
 
