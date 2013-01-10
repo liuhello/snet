@@ -23,7 +23,7 @@ test_socket.o : config.h test_socket.cc
 all	: test_stream test_socket
 	
 clean : 
-	rm -rf *.o socket/*.o test_stream test_stream.exe
+	rm -rf *.o socket/*.o test_stream test_stream.exe test_socket test_socket.exe
 
 
 
