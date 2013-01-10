@@ -17,8 +17,8 @@ namespace snet
         int readLong(sint64& v);
     protected:
         const char* m_buf;
-        int m_pos;
         int m_size;
+        int m_pos;
     };
     class ByteArrayOutputStream
     {
