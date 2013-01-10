@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <errno.h>
+#include <netinet/tcp.h>
 
 namespace snet
 {
