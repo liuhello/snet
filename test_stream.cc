@@ -16,7 +16,7 @@ int main(int argc,char** argv)
     sint8 i8;
     sint16 i16;
     sint32 i32;
-    sint64 i64;
+    sint64 i64 = 11111111114l;
     snet::ByteArrayInputStream is(os.toByte(),os.len());
     is.readByte(i8);
     assert(i8 == 1);

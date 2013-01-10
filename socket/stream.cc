@@ -51,12 +51,12 @@ namespace snet
         if(m_size - m_pos < 8) return -1;
         const char *tmp = m_buf + m_pos;
         v = 0;
-        v += (((*tmp)&0xff)<<56);
-        v += (((*(++tmp))&0xff)<<48);
-        v += (((*(++tmp))&0xff)<<40);
-        v += (((*(++tmp))&0xff)<<32);
-        v += (((*(++tmp))&0xff)<<24);
-        v += (((*(++tmp))&0xff)<<16);
+        v += (((((sint64)(*tmp))&0xff)<<28)<<28);
+        v += (((((sint64)(*(++tmp)))&0xff)<<24)<<24);
+        v += (((((sint64)(*(++tmp)))&0xff)<<20)<<20);
+        v += (((((sint64)(*(++tmp)))&0xff)<<16)<<16);
+        v += ((((sint64)(*(++tmp)))&0xff)<<24);
+        v += ((((sint64)(*(++tmp)))&0xff)<<16);
         v += (((*(++tmp))&0xff)<<8);
         v += ((*(++tmp))&0xff);
         m_pos += 8;
@@ -138,10 +138,10 @@ namespace snet
     {
         if(!checkMemory(8)) return -1;
         char* tmp = m_buf+m_pos;
-        *tmp = (b>>56)&0xff;
-        *(++tmp) = (b>>48)&0xff;
-        *(++tmp) = (b>>40)&0xff;
-        *(++tmp) = (b>>32)&0xff;
+        *tmp = ((b>>28)>>28)&0xff;
+        *(++tmp) = ((b>>24)>>24)&0xff;
+        *(++tmp) = ((b>>20)>>20)&0xff;
+        *(++tmp) = ((b>>16)>>16)&0xff;
         *(++tmp) = (b>>24)&0xff;
         *(++tmp) = (b>>16)&0xff;
         *(++tmp) = (b>>8)&0xff;
