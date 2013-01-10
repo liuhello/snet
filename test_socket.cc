@@ -120,7 +120,6 @@ void testSocket()
     ByteArrayInputStream is(buf,len);
     PingPacket pp2;
     assert(pp2.read(&is));
-    delete[] buf;
     s.close();
     assert(pp2.getTime() == pp.getTime());
     printf("test read success.....\n");
