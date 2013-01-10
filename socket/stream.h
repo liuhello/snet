@@ -1,6 +1,9 @@
 
 #include "config.h"
 
+#ifndef __STREAM_H__
+#define __STREAM_H__
+
 namespace snet
 {
     // A ByteArrayInputStream is a util class which read data(byte short int long) from a char array.
@@ -39,4 +42,6 @@ namespace snet
         int m_pos;
     };
 }
+
+#endif
 
