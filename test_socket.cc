@@ -95,7 +95,7 @@ void echoServer(ServerSocket *ss)
     }
 }
 
-sint64 _time = 1;
+sint64 _time = 11111111111l;
 
 void testSocket()
 {
@@ -144,6 +144,7 @@ int main(int argc,char** argv)
     {
         for(int i = 0;i < 1000;i++)
         {
+            _time += 1000000;
             testSocket();
         }
         kill(pid,SIGABRT);
