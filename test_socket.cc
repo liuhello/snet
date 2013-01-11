@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <assert.h>
 #include <iostream>
+#include <sys/types.h>
+#include <signal.h>
 
 #include "socket/socket.h"
 #include "socket/packet.h"
@@ -72,7 +74,7 @@ void echoServer(ServerSocket *ss)
         Socket* s = ss->accept();
         if(s)
         {
-            printf("accept a socket from : %s\n",s->getAddress().c_str());
+            //printf("accept a socket from : %s\n",s->getAddress().c_str());
             s->setTcpNoDelay(true);
             while(!s->isClosed())
             {
@@ -87,7 +89,7 @@ void echoServer(ServerSocket *ss)
                 assert(writeFull(buf,t,s) == t);
                 if(t < 0)s->close();
             }
-            printf("close socket from : %s\n",s->getAddress().c_str());
+            //printf("close socket from : %s\n",s->getAddress().c_str());
             delete s;
         }
     }
@@ -100,7 +102,7 @@ void testSocket()
     Socket s;
     assert(s.setAddress("127.0.0.1",8888));
     s.connect();
-    printf("connect to : 127.0.0.1:8888 success......\n");
+    //printf("connect to : 127.0.0.1:8888 success......\n");
     s.setTcpNoDelay(true);
     PingPacket pp;
     pp.setTime(_time);
@@ -109,7 +111,7 @@ void testSocket()
     char *buf = os.toByte();
     assert(writeInt(os.len(),&s) == 4);
     assert(writeFull(buf,os.len(),&s) == os.len());
-    printf("test write success.....\n");
+    //printf("test write success.....\n");
     delete[] buf;
     
     int len = 0;
@@ -122,7 +124,7 @@ void testSocket()
     assert(pp2.read(&is));
     s.close();
     assert(pp2.getTime() == pp.getTime());
-    printf("test read success.....\n");
+    //printf("test read success.....\n");
 }
 
 int main(int argc,char** argv)
@@ -136,6 +138,7 @@ int main(int argc,char** argv)
     if(pid == 0) 
     {
         echoServer(&ss);
+        ss.close();
     }
     else
     {
@@ -143,7 +146,7 @@ int main(int argc,char** argv)
         {
             testSocket();
         }
+        kill(pid,SIGABRT);
     }
-    exit(0);
     return 0;
 }
