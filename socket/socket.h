@@ -25,7 +25,7 @@ namespace snet
         bool isClosed(){return m_fd <= 0;}
         int read(void* buf,int size);
         int write(const void* buf,int size);
-        
+        int getFd(){return m_fd;}
         bool setTcpNoDelay(bool noDelay);
     protected:
         bool check_socket_handle();

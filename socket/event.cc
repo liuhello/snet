@@ -71,17 +71,32 @@ namespace snet
         int res = epoll_wait(m_epollFd,events,cnt,timeout);
         for(int i = 0;i < res;i++)
         {
-            e[i] = events[i].data.ptr;
+            e[i] = (Event*)events[i].data.ptr;
+            e[i]->clear();
             if (events[i].events & (EPOLLERR | EPOLLHUP)) {
                 e[i]->setError(true);
             }
             if ((events[i].events & EPOLLIN) != 0) {
-                ioevents[i]->setRead(true);
+                e[i]->setRead(true);
             }
             if ((events[i].events & EPOLLOUT) != 0) {
-                ioevents[i]->setWrite(true);
+                e[i]->setWrite(true);
             }
         }
         return res;
+    }
+    ////////////////////////////////////////////////////////
+    //SocketEvent
+    ////////////////////////////////////////////////////////
+    SocketEvent::SocketEvent(Socket* s,bool read,bool write)
+    {
+        m_socket = s;
+        clear();
+        setRead(read);
+        setWrite(write);
+    }
+    SocketEvent::~SocketEvent()
+    {
+        if(m_socket) delete m_socket;
     }
 }

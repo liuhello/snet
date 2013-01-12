@@ -6,11 +6,14 @@
 #include <iostream>
 #include <sys/types.h>
 #include <signal.h>
+#include <errno.h>
+#include <string.h>
 
 #include "socket/socket.h"
 #include "socket/packet.h"
 #include "socket/stream.h"
 #include "config.h"
+#include "socket/event.h"
 
 using namespace snet;
 
@@ -69,9 +72,29 @@ int writeInt(int b,Socket* s)
 
 void echoServer(ServerSocket *ss)
 {
+    SocketEvent sse(ss,true,false);
+    EpollEventManager eem;
+    eem.init();
+    if(!eem.addEvent(&sse))printf("error occur errno : %d str : %s fd : %d\n",errno,strerror(errno),ss->getFd());
+    Event **se = new Event*[12];
     while(true)
     {
-        Socket* s = ss->accept();
+        Socket *s = 0;
+        int count = eem.getEvent(0,se,12);
+        //printf("get %d event from event manager.\n",count);
+        if(count < 0) {printf("error occur errno : %d str : %s fd : %d\n",errno,strerror(errno),ss->getFd());break;};
+        for(int i = 0;i < count;i++)
+        {
+            SocketEvent *septr = (SocketEvent*)se[i];
+            Socket *tmp = septr->getSocket();
+            //printf("%X == %X\n",tmp,ss);
+            if(tmp == ss)
+            {
+                //printf("is read %d\n",septr->isRead()?1:0);
+                s = ss->accept();
+                //printf("%x\n",s);
+            }
+        }
         if(s)
         {
             //printf("accept a socket from : %s\n",s->getAddress().c_str());
