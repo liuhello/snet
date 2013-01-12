@@ -35,8 +35,8 @@ namespace snet
     class EventManager
     {
     public:
-        virtual bool addEvent(Event* e) = 0;
-        virtual bool updateEvent(Event* e) = 0;
+        virtual bool addEvent(Event* e,bool read,bool write) = 0;
+        virtual bool updateEvent(Event* e,bool read,bool write) = 0;
         virtual bool removeEvent(Event* e) = 0;
         virtual int getEvent(int timeout,Event** e,int cnt) = 0;
     };
@@ -47,8 +47,8 @@ namespace snet
         EpollEventManager();
         ~EpollEventManager();
         bool init();
-        virtual bool addEvent(Event* e);
-        virtual bool updateEvent(Event* e);
+        virtual bool addEvent(Event* e,bool read,bool write);
+        virtual bool updateEvent(Event* e,bool read,bool write);
         virtual bool removeEvent(Event* e);
         virtual int getEvent(int timeout,Event** e,int cnt);
     protected:
@@ -58,7 +58,7 @@ namespace snet
     class SocketEvent : public Event
     {
     public:
-        SocketEvent(Socket* s,bool read,bool write);
+        SocketEvent(Socket* s);
         ~SocketEvent();
         Socket* getSocket(){return m_socket;}
         virtual int getFileDesc(){return m_socket->getFd();}

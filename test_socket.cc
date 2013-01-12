@@ -72,10 +72,10 @@ int writeInt(int b,Socket* s)
 
 void echoServer(ServerSocket *ss)
 {
-    SocketEvent sse(ss,true,false);
+    SocketEvent sse(ss);
     EpollEventManager eem;
     eem.init();
-    if(!eem.addEvent(&sse))printf("error occur errno : %d str : %s fd : %d\n",errno,strerror(errno),ss->getFd());
+    if(!eem.addEvent(&sse,true,false))printf("error occur errno : %d str : %s fd : %d\n",errno,strerror(errno),ss->getFd());
     Event **se = new Event*[12];
     while(true)
     {

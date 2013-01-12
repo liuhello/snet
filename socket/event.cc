@@ -26,24 +26,24 @@ namespace snet
         return m_epollFd > 0;
     }
     
-    bool EpollEventManager::addEvent(Event* e)
+    bool EpollEventManager::addEvent(Event* e,bool read,bool write)
     {
         struct epoll_event ev;
         memset(&ev,0,sizeof(ev));
         ev.events = 0;
-        if(e->isRead()) ev.events |= EPOLLIN;
-        if(e->isWrite()) ev.events |= EPOLLOUT;
+        if(read) ev.events |= EPOLLIN;
+        if(write) ev.events |= EPOLLOUT;
         ev.data.fd = e->getFileDesc();
         ev.data.ptr = e;
         return epoll_ctl(m_epollFd, EPOLL_CTL_ADD, e->getFileDesc(), &ev) != -1;
     }
-    bool EpollEventManager::updateEvent(Event* e)
+    bool EpollEventManager::updateEvent(Event* e,bool read,bool write)
     {
         struct epoll_event ev;
         memset(&ev,0,sizeof(ev));
         ev.events = 0;
-        if(e->isRead()) ev.events |= EPOLLIN;
-        if(e->isWrite()) ev.events |= EPOLLOUT;
+        if(read) ev.events |= EPOLLIN;
+        if(write) ev.events |= EPOLLOUT;
         ev.data.fd = e->getFileDesc();
         ev.data.ptr = e;
         return epoll_ctl(m_epollFd, EPOLL_CTL_MOD, e->getFileDesc(), &ev) != -1;
@@ -88,12 +88,9 @@ namespace snet
     ////////////////////////////////////////////////////////
     //SocketEvent
     ////////////////////////////////////////////////////////
-    SocketEvent::SocketEvent(Socket* s,bool read,bool write)
+    SocketEvent::SocketEvent(Socket* s)
     {
         m_socket = s;
-        clear();
-        setRead(read);
-        setWrite(write);
     }
     SocketEvent::~SocketEvent()
     {
