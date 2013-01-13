@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <assert.h>
+#include <vector>
 
 int main(int argc,char** argv)
 {
@@ -35,6 +36,27 @@ int main(int argc,char** argv)
     snet::PingPacket pp2;
     pp2.read(&is);
     assert(pp.getTime() == pp2.getTime());
+    
+    snet::ByteBuffer bb(16);
+    for(int i = 0;i < 100;i++)
+    {
+        bb.writeShort(i);
+    }
+    for(int i = 0;i < 100;i++)
+    {
+        bb.readShort(i16);
+        assert(i16 == i);
+    }
+    for(int i = 50;i < 1100;i++)
+    {
+        bb.writeInt(i);
+    }
+    for(int i = 50;i < 1100;i++)
+    {
+        bb.readInt(i32);
+        //printf("i32 = %d and i = %d\n",i32,i);
+        assert(i32 == i);
+    }
     
     return 0;
 }

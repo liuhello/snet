@@ -6,11 +6,11 @@ namespace snet
     ///////////////////////////////////////////
     //PingPacket
     ///////////////////////////////////////////
-    bool PingPacket::write(ByteArrayOutputStream *os)
+    bool PingPacket::write(DataOutputStream *os)
     {
         return os->writeLong(m_time) == 8;
     }
-    bool PingPacket::read(ByteArrayInputStream *is)
+    bool PingPacket::read(DataInputStream *is)
     {
         return is->readLong(m_time) == 8;
     }
