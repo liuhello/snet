@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <cstdlib>
+#include <map>
 
 #include "socket.h"
 
@@ -41,18 +42,29 @@ namespace snet
         virtual int getEvent(int timeout,Event** e,int cnt) = 0;
     };
     
-    class EpollEventManager : public EventManager
+    class SocketEventManager : public EventManager
     {
     public:
-        EpollEventManager();
-        ~EpollEventManager();
+        SocketEventManager();
+        ~SocketEventManager();
         bool init();
         virtual bool addEvent(Event* e,bool read,bool write);
         virtual bool updateEvent(Event* e,bool read,bool write);
         virtual bool removeEvent(Event* e);
         virtual int getEvent(int timeout,Event** e,int cnt);
     protected:
+    #ifdef WINDOWS_OS
+        struct EventStruct
+        {
+            Event* m_event;
+            bool m_read;
+            bool m_write;
+        };
+        std::map<int,EventStruct*> m_events;
+        int m_maxFd;
+    #else
         int m_epollFd;
+    #endif
     };
 
     class SocketEvent : public Event
@@ -65,5 +77,6 @@ namespace snet
     protected:
         Socket* m_socket;
     };
+
 }
 #endif
