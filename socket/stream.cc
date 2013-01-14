@@ -173,12 +173,14 @@ namespace snet
         m_buf = new char[tsize];
         m_read = m_write = m_buf;
         m_size = tsize;
+        m_mark = 0;
     }
     ByteBuffer::~ByteBuffer()
     {
         delete[] m_buf;
         m_read = m_write = m_buf = 0;
         m_size = 0;
+        m_mark = 0;
     }
     /*
     *  check the available memory buffer size,if it is less than size,it alloc new memory for it.
@@ -312,6 +314,25 @@ namespace snet
         m_write++;
         return 8;
     }
+    
+    void ByteBuffer::mark()
+    {
+        m_mark = m_read;
+    }
+    bool ByteBuffer::unmark()
+    {
+        if(m_mark == 0||m_mark < m_read) return false;
+        m_read = m_mark;
+        m_mark = 0;
+        return true;
+    }
+    bool ByteBuffer::consume(int size)
+    {
+        if(size > len()) return false;
+        m_read += size;
+        return true;
+    }
+    
     
 }
 

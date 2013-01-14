@@ -90,12 +90,22 @@ namespace snet
         int writeShort(sint16 b);
         int writeInt(sint32 b);
         int writeLong(sint64 b);
+        
+        int len(){return m_write - m_read;}
+        char* array(){return m_read;}
+        bool consume(int size);
+        
+        //mark current read pos 
+        void mark();
+        //reset the current read pos to the mark pos
+        bool unmark();
     protected:
         bool checkMemory(int size);
     protected:
         char* m_buf;
         char* m_read;
         char* m_write;
+        char* m_mark;
         int m_size;
     };
 }

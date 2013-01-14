@@ -74,6 +74,9 @@ namespace snet
         ~SocketEvent();
         Socket* getSocket(){return m_socket;}
         virtual int getFileDesc(){return m_socket->getFd();}
+        virtual bool handleRead() = 0;
+        virtual bool handleWrite() = 0;
+        virtual bool isServerSocket(){return false;};
     protected:
         Socket* m_socket;
     };

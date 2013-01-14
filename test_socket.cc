@@ -14,6 +14,7 @@
 #include "socket/stream.h"
 #include "config.h"
 #include "socket/event.h"
+#include "socket/connection.h"
 
 using namespace snet;
 
@@ -72,48 +73,71 @@ int writeInt(int b,Socket* s)
 
 void echoServer(ServerSocket *ss)
 {
-    SocketEvent sse(ss);
     SocketEventManager eem;
     eem.init();
+    ServerSocketEvent sse(ss,&eem);
     if(!eem.addEvent(&sse,true,false))printf("error occur errno : %d str : %s fd : %d\n",errno,strerror(errno),ss->getFd());
     Event **se = new Event*[12];
     while(true)
     {
-        Socket *s = 0;
         int count = eem.getEvent(0,se,12);
         //printf("get %d event from event manager.\n",count);
-        if(count < 0) {printf("error occur errno : %d str : %s fd : %d\n",errno,strerror(errno),ss->getFd());break;};
+        if(count < 0) {printf("count : %d error occur errno : %d str : %s fd : %d line : %d file : %s\n",count,errno,strerror(errno),ss->getFd(),__LINE__,__FILE__);};
+        assert(count >= 0);
         for(int i = 0;i < count;i++)
         {
             SocketEvent *septr = (SocketEvent*)se[i];
-            Socket *tmp = septr->getSocket();
-            //printf("%X == %X\n",tmp,ss);
-            if(tmp == ss)
+            if(septr->isWrite())
             {
-                //printf("is read %d\n",septr->isRead()?1:0);
-                s = ss->accept();
-                //printf("%x\n",s);
-            }
-        }
-        if(s)
-        {
-            //printf("accept a socket from : %s\n",s->getAddress().c_str());
-            s->setTcpNoDelay(true);
-            while(!s->isClosed())
-            {
-                char buf[1024];
-                int t = s->read(buf,1024);
-                if(t <= 0) 
+                if(!septr->handleWrite())
                 {
-                    s->close();
-                    break;
+                    eem.removeEvent(septr);
+                    printf("socket : %s handle write failed close it.\n",septr->getSocket()->getAddress().c_str());
+                    delete septr;
+                    continue;
                 }
-                //s->write(buf,t);
-                assert(writeFull(buf,t,s) == t);
-                if(t < 0)s->close();
+                if(!septr->isServerSocket())
+                {
+                    Connection* conn = (Connection*)septr;
+                    ByteBuffer *bb = conn->getWriteBuffer();
+                    if(bb->len() <= 0)
+                    {
+                        eem.updateEvent(conn,true,false);
+                    }
+                }
             }
-            //printf("close socket from : %s\n",s->getAddress().c_str());
-            delete s;
+            if(septr->isRead())
+            {
+                if(!septr->handleRead())
+                {
+                    eem.removeEvent(septr);
+                    printf("socket : %s hanlde read failed close it.\n",septr->getSocket()->getAddress().c_str());
+                    delete septr;
+                    continue;
+                }
+            }
+            if(septr->hasError())
+            {
+                eem.removeEvent(septr);
+                printf("socket : %s hasError close it.\n",septr->getSocket()->getAddress().c_str());
+                printf("errno : %d error str: %s\n",errno,strerror(errno));
+                delete septr;
+                continue;
+            }
+            if(!septr->isServerSocket())
+            {
+                Connection* conn = (Connection*)septr;
+                ByteBuffer *bb = conn->getReadBuffer();
+                if(bb->len() > 0)
+                {
+                    int len = bb->len();
+                    char* tmp = new char[len];
+                    assert(bb->read(tmp,len) == len);
+                    bb = conn->getWriteBuffer();
+                    assert(bb->write(tmp,len) == len);
+                    eem.updateEvent(conn,true,true);
+                }
+            }
         }
     }
 }
@@ -124,7 +148,7 @@ void testSocket()
 {
     Socket s;
     assert(s.setAddress("127.0.0.1",8888));
-    s.connect();
+    assert(s.connect());
     //printf("connect to : 127.0.0.1:8888 success......\n");
     s.setTcpNoDelay(true);
     PingPacket pp;

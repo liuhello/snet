@@ -12,7 +12,7 @@ fi
 rm -rf $OUTPUT
 touch $OUTPUT
 
-DIRS=$PREFIX/socket
+DIRS="$PREFIX/socket $PREFIX/thread"
 
 FILES=`find $DIRS -name '*.cc' -print | sort | sed "s,^$PREFIX/,," | tr "\n" " "`
 

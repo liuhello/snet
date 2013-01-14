@@ -4,6 +4,18 @@
 namespace snet
 {
     ///////////////////////////////////////////
+    //ResponsePacket
+    ///////////////////////////////////////////
+    bool ResponsePacket::write(DataOutputStream *os)
+    {
+        return os->writeShort(m_result) == 2;
+    }
+    bool ResponsePacket::read(DataInputStream *is)
+    {
+        return is->readShort(m_result) == 2;
+    }
+    
+    ///////////////////////////////////////////
     //PingPacket
     ///////////////////////////////////////////
     bool PingPacket::write(DataOutputStream *os)

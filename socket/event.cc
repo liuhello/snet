@@ -6,6 +6,7 @@
 #endif
 #include <sys/select.h>
 #include <unistd.h>
+#include <cstdio>
 
 #define MAX_EPOLL_EVENTS        16
 
@@ -126,6 +127,7 @@ namespace snet
             if(maxFd < fd) maxFd = fd;
             iter++;
         }
+        printf("Event size : %d maxFd : %d\n",m_events.size(),maxFd);
         struct timeval tval,*tptr = NULL;
         if(timeout > 0) 
         {

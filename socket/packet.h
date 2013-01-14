@@ -25,6 +25,18 @@ namespace snet
         sint32 m_opCode;
     };
     
+    class ResponsePacket : public BasePacket
+    {
+    public:
+        ResponsePacket(sint32 code):BasePacket(code),m_result(-1){};
+        bool write(DataOutputStream* os);
+        bool read(DataInputStream* is);
+        sint16 getResult(){return m_result;}
+        void setResult(sint16 res){m_result = res;}
+    protected:
+        sint16 m_result;
+    };
+    
     class PacketFactory
     {
     public:

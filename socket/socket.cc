@@ -17,7 +17,7 @@ namespace snet
     }
     Socket::~Socket()
     {
-        m_fd = -1;
+        close();
     }
     bool Socket::setAddress(const char* ip,int port)
     {
