@@ -115,6 +115,9 @@ namespace snet
     {
     #ifdef WINDOWS_OS
         fd_set rset,wset,eset;
+        FD_ZERO(&rset);
+        FD_ZERO(&wset);
+        FD_ZERO(&eset);
         int maxFd = 0;
         std::map<int,EventStruct*>::iterator iter = m_events.begin();
         while(iter != m_events.end())
@@ -127,7 +130,7 @@ namespace snet
             if(maxFd < fd) maxFd = fd;
             iter++;
         }
-        printf("Event size : %d maxFd : %d\n",m_events.size(),maxFd);
+        //printf("Event size : %d maxFd : %d\n",m_events.size(),maxFd);
         struct timeval tval,*tptr = NULL;
         if(timeout > 0) 
         {

@@ -26,7 +26,7 @@ namespace snet
         char buf[MAX_BUF_SIZE];
         int res = m_socket->read(buf,MAX_BUF_SIZE);
         if(res <= 0) return false;
-        printf("read %d byte from connection\n",res);
+        //printf("read %d byte from connection\n",res);
         return m_read->write(buf,res) == res;
     }
     bool Connection::handleWrite()
@@ -52,7 +52,7 @@ namespace snet
         Socket *s = ss->accept();
         if(s)
         {
-            printf("accept socket : %s\n",s->getAddress().c_str());
+            //printf("accept socket : %s\n",s->getAddress().c_str());
             s->setTcpNoDelay(true);
             Connection *conn = new Connection(s);
             return m_manager->addEvent(conn,true,false);
