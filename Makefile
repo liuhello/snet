@@ -4,7 +4,7 @@ $(shell ./build_config.sh build_config.mk ./)
 include build_config.mk
 
 CXX = g++
-CCFLAGS = -g -Wall -D WINDOWS_OS
+CCFLAGS = -g -Wall -lpthread -D WINDOWS_OS
 INCLUDE = .
 
 LIBOBJECTS = $(SOURCES:.cc=.o)
@@ -14,10 +14,10 @@ LIBOBJECTS = $(SOURCES:.cc=.o)
 all	: test_stream test_socket
 
 test_stream : test_stream.o ${LIBOBJECTS}
-	${CXX} -o test_stream test_stream.o ${LIBOBJECTS}
+	${CXX} ${CCFLAGS} -o test_stream test_stream.o ${LIBOBJECTS}
 
 test_socket : test_socket.o ${LIBOBJECTS}
-	${CXX} -o test_socket test_socket.o ${LIBOBJECTS}
+	${CXX} ${CCFLAGS} -o test_socket test_socket.o ${LIBOBJECTS}
 	
 #socket/stream.o : config.h socket/stream.h socket/stream.cc
 #	${CXX} -I${INCLUDE} ${CCFLAGS} -o socket/stream.o -c socket/stream.cc
