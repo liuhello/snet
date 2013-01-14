@@ -35,7 +35,7 @@ test_socket : test_socket.o ${LIBOBJECTS}
 
 	
 clean : 
-	rm -rf *.o socket/*.o test_stream test_stream.exe* test_socket test_socket.exe* build_config.mk
+	rm -rf *.o */*.o test_stream test_stream.exe* test_socket test_socket.exe* build_config.mk
 
 
 

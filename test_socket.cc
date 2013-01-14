@@ -15,6 +15,7 @@
 #include "config.h"
 #include "socket/event.h"
 #include "socket/connection.h"
+#include "thread/thread.h"
 
 using namespace snet;
 
@@ -144,7 +145,7 @@ void echoServer(ServerSocket *ss)
 
 sint64 _time = 11111111111l;
 
-void testSocket()
+void __testSocket()
 {
     Socket s;
     assert(s.setAddress("127.0.0.1",8888));
@@ -174,6 +175,33 @@ void testSocket()
     //printf("test read success.....\n");
 }
 
+class TestThread : public Thread
+{
+public:
+    void run()
+    {
+        for(int i = 0;i < 10;i++)
+        {
+            __testSocket();
+        }
+    }
+};
+
+void testSocket()
+{
+    const int num = 10;
+    TestThread th[num];
+    for(int i = 0;i < num;i++)
+    {
+        th[i].start();
+    }
+    for(int i = 0;i < num;i++)
+    {
+        th[i].join();
+    }
+    
+}
+
 int main(int argc,char** argv)
 {
     
@@ -189,11 +217,8 @@ int main(int argc,char** argv)
     }
     else
     {
-        for(int i = 0;i < 1000;i++)
-        {
-            _time += 1000000;
-            testSocket();
-        }
+        _time += 1000000;
+        testSocket();
         kill(pid,SIGABRT);
     }
     return 0;
