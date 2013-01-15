@@ -156,6 +156,7 @@ void __testSocket()
     Socket s;
     assert(s.setAddress("127.0.0.1",8888));
     bool res = s.connect();
+    s.setReuseAddress(true);
     if(!res)printf("errno : %d error str : %s\n",errno,strerror(errno));
     assert(res);
     //printf("connect to : 127.0.0.1:8888 success......\n");
@@ -252,6 +253,7 @@ int main(int argc,char** argv)
     ServerSocket ss(16);
     assert(ss.setAddress("127.0.0.1",8888));
     assert(ss.listen());
+    ss.setReuseAddress(true);
     assert(lock.init() == 0);
     int pid = fork();
     if(pid == 0) 

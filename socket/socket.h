@@ -27,6 +27,8 @@ namespace snet
         int write(const void* buf,int size);
         int getFd(){return m_fd;}
         bool setTcpNoDelay(bool noDelay);
+        bool setIntOption(int op,int value);
+        bool setReuseAddress(bool value){return setIntOption(SO_REUSEADDR, value ? 1 : 0);}
     protected:
         bool check_socket_handle();
     protected:

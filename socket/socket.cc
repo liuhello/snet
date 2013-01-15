@@ -130,6 +130,14 @@ namespace snet
         }
         return rc;
     }
+    bool Socket::setIntOption(int op,int value)
+    {
+        int ret = -1;
+        if(check_socket_handle()) {
+            ret = setsockopt(m_fd,SOL_SOCKET,op,(const void*)(&value),sizeof(value));
+        }
+        return ret == 0; 
+    }
     /////////////////////////////////////////
     //ServerSocket
     /////////////////////////////////////////
