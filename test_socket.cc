@@ -150,6 +150,7 @@ int maxThread = 20;
 int currentThread = 0;
 int threadId = 0;
 Lock lock;
+int timeout = 1000*60*60;
 
 void __testSocket()
 {
@@ -157,6 +158,7 @@ void __testSocket()
     assert(s.setAddress("127.0.0.1",8888));
     bool res = s.connect();
     s.setReuseAddress(true);
+    s.setTimeout(timeout);
     if(!res)printf("errno : %d error str : %s\n",errno,strerror(errno));
     assert(res);
     //printf("connect to : 127.0.0.1:8888 success......\n");
@@ -254,6 +256,7 @@ int main(int argc,char** argv)
     assert(ss.setAddress("127.0.0.1",8888));
     assert(ss.listen());
     ss.setReuseAddress(true);
+    ss.setTimeout(timeout);
     assert(lock.init() == 0);
     int pid = fork();
     if(pid == 0) 

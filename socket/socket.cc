@@ -133,10 +133,29 @@ namespace snet
     bool Socket::setIntOption(int op,int value)
     {
         int ret = -1;
-        if(check_socket_handle()) {
+        if(check_socket_handle()) 
+        {
             ret = setsockopt(m_fd,SOL_SOCKET,op,(const void*)(&value),sizeof(value));
         }
         return ret == 0; 
+    }
+    bool Socket::setTimeOption(int op,int milliseconds)
+    {
+        int ret = -1;
+        if(check_socket_handle())
+        {
+            struct timeval tv;
+            tv.tv_sec = milliseconds/1000;
+            tv.tv_usec = (milliseconds%1000)*1000000;
+            ret = setsockopt(m_fd,SOL_SOCKET,op,(const void*)(&tv),sizeof(tv));
+        }
+        return ret == 0;
+    }
+    bool Socket::setTimeout(int milliseconds)
+    {
+        bool res = setTimeOption(SO_SNDTIMEO,milliseconds);
+        if(!res)return res;
+        return setTimeOption(SO_RCVTIMEO,milliseconds);
     }
     /////////////////////////////////////////
     //ServerSocket

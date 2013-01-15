@@ -29,6 +29,8 @@ namespace snet
         bool setTcpNoDelay(bool noDelay);
         bool setIntOption(int op,int value);
         bool setReuseAddress(bool value){return setIntOption(SO_REUSEADDR, value ? 1 : 0);}
+        bool setTimeOption(int op,int milliseconds);
+        bool setTimeout(int milliseconds);
     protected:
         bool check_socket_handle();
     protected:
