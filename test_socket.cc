@@ -21,6 +21,9 @@
 
 using namespace snet;
 
+#define EVENT_ARRAY_SIZE        1024
+
+
 int readFull(char* buf,int size,Socket* s)
 {
     int remain = size;
@@ -40,7 +43,12 @@ int readInt(int& v,Socket* s)
     char buf[4];
     char* tmp = buf;
     int t = readFull(tmp,4,s);
-    if(t < 0)return -t;
+    //if(t < 0)return -t;
+    if(t != 4)
+    {
+        printf("read data failed errno : %d error str : %s socket : %s\n",errno,strerror(errno),s->getAddress().c_str());
+        return t;
+    }
     v = 0;
     v += (((*tmp)&0xff)<<24);
     v += (((*(++tmp))&0xff)<<16);
@@ -80,11 +88,11 @@ void echoServer(ServerSocket *ss)
     eem.init();
     ServerSocketEvent sse(ss,&eem);
     if(!eem.addEvent(&sse,true,false))printf("error occur errno : %d str : %s fd : %d\n",errno,strerror(errno),ss->getFd());
-    Event **se = new Event*[12];
+    Event **se = new Event*[EVENT_ARRAY_SIZE];
     while(true)
     {
-        int count = eem.getEvent(0,se,12);
-        //printf("get %d event from event manager.\n",count);
+        int count = eem.getEvent(-1,se,EVENT_ARRAY_SIZE);
+        printf("get %d event from event manager.\n",count);
         if(count < 0) {printf("count : %d error occur errno : %d str : %s fd : %d line : %d file : %s\n",count,errno,strerror(errno),ss->getFd(),__LINE__,__FILE__);};
         assert(count >= 0);
         for(int i = 0;i < count;i++)
@@ -146,7 +154,7 @@ void echoServer(ServerSocket *ss)
 }
 
 sint64 _time = 11111111111l;
-int maxThread = 20;
+int maxThread = 50;
 int currentThread = 0;
 int threadId = 0;
 Lock lock;
@@ -156,9 +164,9 @@ void __testSocket()
 {
     Socket s;
     assert(s.setAddress("127.0.0.1",8888));
-    bool res = s.connect();
     s.setReuseAddress(true);
     s.setTimeout(timeout);
+    bool res = s.connect();
     if(!res)printf("errno : %d error str : %s\n",errno,strerror(errno));
     assert(res);
     //printf("connect to : 127.0.0.1:8888 success......\n");
@@ -214,7 +222,7 @@ public:
         //printf("thread %d acquire 1 and current run thread count: %d\n",m_id,currentThread);
         res = lock.unlock();
         if(res != 0)printf("_unlock failed : %d thread : %d\n",res,m_id);
-        for(int i = 0;i < 10;i++)
+        for(int i = 0;i < 100;i++)
         {
             __testSocket();
         }
