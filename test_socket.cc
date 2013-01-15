@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
+#include <vector>
 
 #include "socket/socket.h"
 #include "socket/packet.h"
@@ -16,6 +17,7 @@
 #include "socket/event.h"
 #include "socket/connection.h"
 #include "thread/thread.h"
+#include "thread/lock.h"
 
 using namespace snet;
 
@@ -93,7 +95,7 @@ void echoServer(ServerSocket *ss)
                 if(!septr->handleWrite())
                 {
                     eem.removeEvent(septr);
-                    printf("socket : %s handle write failed close it.\n",septr->getSocket()->getAddress().c_str());
+                    //printf("socket : %s handle write failed close it.\n",septr->getSocket()->getAddress().c_str());
                     delete septr;
                     continue;
                 }
@@ -112,7 +114,7 @@ void echoServer(ServerSocket *ss)
                 if(!septr->handleRead())
                 {
                     eem.removeEvent(septr);
-                    printf("socket : %s hanlde read failed close it.\n",septr->getSocket()->getAddress().c_str());
+                    //printf("socket : %s hanlde read failed close it.\n",septr->getSocket()->getAddress().c_str());
                     delete septr;
                     continue;
                 }
@@ -144,12 +146,18 @@ void echoServer(ServerSocket *ss)
 }
 
 sint64 _time = 11111111111l;
+int maxThread = 20;
+int currentThread = 0;
+int threadId = 0;
+Lock lock;
 
 void __testSocket()
 {
     Socket s;
     assert(s.setAddress("127.0.0.1",8888));
-    assert(s.connect());
+    bool res = s.connect();
+    if(!res)printf("errno : %d error str : %s\n",errno,strerror(errno));
+    assert(res);
     //printf("connect to : 127.0.0.1:8888 success......\n");
     s.setTcpNoDelay(true);
     PingPacket pp;
@@ -178,26 +186,62 @@ void __testSocket()
 class TestThread : public Thread
 {
 public:
+    TestThread()
+    {
+        lock.lock();
+        threadId += 1;
+        m_id = threadId;
+        lock.unlock();
+    }
     void run()
     {
+        int res = 0;
+        res = lock.lock();
+        if(res != 0)
+        {
+            printf("_lock failed : %d thread : %d error str : %s\n",res,m_id,strerror(res));
+        }
+        while(currentThread > maxThread)
+        {
+            //printf("thread id : %d current run thread count: %d\n",m_id,currentThread);
+            res = lock.wait(0);
+            if(res != 0)printf("_wait failed : %d thread : %d\n",res,m_id);
+        }
+        currentThread += 1;
+        //printf("thread %d acquire 1 and current run thread count: %d\n",m_id,currentThread);
+        res = lock.unlock();
+        if(res != 0)printf("_unlock failed : %d thread : %d\n",res,m_id);
         for(int i = 0;i < 10;i++)
         {
             __testSocket();
         }
+        res = lock.lock();
+        if(res != 0)printf("lock failed : %d thread : %d\n",res,m_id);
+        currentThread -= 1;
+        res = lock.signalAll();
+        if(res != 0)printf("signalAll failed : %d thread : %d\n",res,m_id);
+        res = lock.unlock();
+        if(res != 0)printf("unlock failed : %d thread : %d\n",res,m_id);        
     }
+protected:
+    int m_id;
 };
 
 void testSocket()
 {
-    const int num = 10;
-    TestThread th[num];
+    const int num = 10000;
+    //TestThread th[num];
+    std::vector<TestThread*> threads;
     for(int i = 0;i < num;i++)
     {
-        th[i].start();
+        TestThread *tptr = new TestThread;
+        threads.push_back(tptr);
+        tptr->start();
     }
     for(int i = 0;i < num;i++)
     {
-        th[i].join();
+        threads[i]->join();
+        //printf("thread %d exit\n",i);
     }
     
 }
@@ -208,7 +252,7 @@ int main(int argc,char** argv)
     ServerSocket ss(16);
     assert(ss.setAddress("127.0.0.1",8888));
     assert(ss.listen());
-    
+    assert(lock.init() == 0);
     int pid = fork();
     if(pid == 0) 
     {

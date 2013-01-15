@@ -203,5 +203,6 @@ namespace snet
     SocketEvent::~SocketEvent()
     {
         if(m_socket) delete m_socket;
+        m_socket = NULL;
     }
 }

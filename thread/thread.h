@@ -27,6 +27,22 @@ namespace snet
         int m_status;
     };
     
+    class Runnable
+    {
+    public:
+        virtual void run()=0;
+    };
+    
+    class RThread : public Thread
+    {
+    public:
+        RThread(Runnable *r);
+        ~RThread();
+        void run();
+    protected:
+        Runnable* m_run;
+    };
+    
     
 }
 #endif
