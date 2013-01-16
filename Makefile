@@ -4,7 +4,7 @@ $(shell ./build_config.sh build_config.mk ./)
 include build_config.mk
 
 CXX = g++
-CCFLAGS = -g -Wall -lpthread #-D WINDOWS_OS
+CCFLAGS = -g -Wall -lpthread -D WINDOWS_OS
 INCLUDE = .
 
 LIBOBJECTS = $(SOURCES:.cc=.o)
