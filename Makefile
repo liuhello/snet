@@ -13,11 +13,11 @@ LIBOBJECTS = $(SOURCES:.cc=.o)
 
 all	: test_stream test_socket
 
-test_stream : test_stream.o ${LIBOBJECTS}
-	${CXX} ${CCFLAGS} -o test_stream test_stream.o ${LIBOBJECTS}
+test_stream : test/test_stream.o ${LIBOBJECTS}
+	${CXX} ${CCFLAGS} -o test_stream test/test_stream.o ${LIBOBJECTS}
 
-test_socket : test_socket.o ${LIBOBJECTS}
-	${CXX} ${CCFLAGS} -o test_socket test_socket.o ${LIBOBJECTS}
+test_socket : test/test_socket.o ${LIBOBJECTS}
+	${CXX} ${CCFLAGS} -o test_socket test/test_socket.o ${LIBOBJECTS}
 	
 #socket/stream.o : config.h socket/stream.h socket/stream.cc
 #	${CXX} -I${INCLUDE} ${CCFLAGS} -o socket/stream.o -c socket/stream.cc

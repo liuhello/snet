@@ -1,5 +1,5 @@
 
-#include "socket/stream.h"
+#include "stream.h"
 #include "config.h"
 
 #ifndef __PACKET_H__

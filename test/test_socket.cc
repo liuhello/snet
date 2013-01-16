@@ -10,14 +10,14 @@
 #include <string.h>
 #include <vector>
 
-#include "socket/socket.h"
-#include "socket/packet.h"
-#include "socket/stream.h"
-#include "config.h"
-#include "socket/event.h"
-#include "socket/connection.h"
-#include "thread/thread.h"
-#include "thread/lock.h"
+#include "snet/socket.h"
+#include "snet/packet.h"
+#include "snet/stream.h"
+#include "snet/config.h"
+#include "snet/event.h"
+#include "snet/connection.h"
+#include "snet/thread.h"
+#include "snet/lock.h"
 
 using namespace snet;
 
@@ -146,7 +146,7 @@ void echoServer(ServerSocket *ss)
 }
 
 sint64 _time = 11111111111l;
-int maxThread = 20;
+int maxThread = 150;
 int currentThread = 0;
 int threadId = 0;
 Lock lock;
@@ -156,33 +156,38 @@ void __testSocket()
 {
     Socket s;
     assert(s.setAddress("127.0.0.1",8888));
-    bool res = s.connect();
     s.setReuseAddress(true);
     s.setTimeout(timeout);
+    s.setTcpNoDelay(true);
+    bool res = s.connect();
     if(!res)printf("errno : %d error str : %s\n",errno,strerror(errno));
     assert(res);
-    //printf("connect to : 127.0.0.1:8888 success......\n");
-    s.setTcpNoDelay(true);
-    PingPacket pp;
-    pp.setTime(_time);
-    ByteArrayOutputStream os;
-    pp.write(&os);
-    char *buf = os.toByte();
-    assert(writeInt(os.len(),&s) == 4);
-    assert(writeFull(buf,os.len(),&s) == os.len());
-    //printf("test write success.....\n");
-    delete[] buf;
     
-    int len = 0;
-    assert(readInt(len,&s)==4);
-    assert(len == os.len());
-    buf = new char[len];
-    assert(readFull(buf,len,&s) == len);
-    ByteArrayInputStream is(buf,len);
-    PingPacket pp2;
-    assert(pp2.read(&is));
+    for(int i = 0;i < 100;i++)
+    {
+        Thread::msleep(1);
+        PingPacket pp;
+        pp.setTime(_time);
+        ByteArrayOutputStream os;
+        pp.write(&os);
+        char *buf = os.toByte();
+        assert(writeInt(os.len(),&s) == 4);
+        assert(writeFull(buf,os.len(),&s) == os.len());
+        //printf("test write success.....\n");
+        delete[] buf;
+        
+        int len = 0;
+        assert(readInt(len,&s)==4);
+        assert(len == os.len());
+        buf = new char[len];
+        assert(readFull(buf,len,&s) == len);
+        ByteArrayInputStream is(buf,len);
+        PingPacket pp2;
+        assert(pp2.read(&is));
+        assert(pp2.getTime() == pp.getTime());
+    }
     s.close();
-    assert(pp2.getTime() == pp.getTime());
+    
     //printf("test read success.....\n");
 }
 
@@ -214,10 +219,7 @@ public:
         //printf("thread %d acquire 1 and current run thread count: %d\n",m_id,currentThread);
         res = lock.unlock();
         if(res != 0)printf("_unlock failed : %d thread : %d\n",res,m_id);
-        for(int i = 0;i < 10;i++)
-        {
-            __testSocket();
-        }
+        __testSocket();
         res = lock.lock();
         if(res != 0)printf("lock failed : %d thread : %d\n",res,m_id);
         currentThread -= 1;

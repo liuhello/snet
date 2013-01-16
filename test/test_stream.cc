@@ -1,7 +1,7 @@
 
-#include "socket/stream.h"
-#include "socket/packet.h"
-#include "config.h"
+#include "snet/stream.h"
+#include "snet/packet.h"
+#include "snet/config.h"
 #include <cstdlib>
 #include <cstdio>
 #include <assert.h>

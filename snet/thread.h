@@ -3,6 +3,7 @@
 #define __THREAD_H__
 
 #include <pthread.h>
+#include <unistd.h>
 
 namespace snet
 {
@@ -20,6 +21,8 @@ namespace snet
         virtual void start();
         virtual void join();
         int getStatus(){return m_status;}
+        static int sleep(unsigned int seconds){return ::sleep(seconds);}
+        static int msleep(unsigned int milliseconds){return ::usleep(milliseconds*1000l);}
     private:
         static void* start_thread(void *t);
     protected:
