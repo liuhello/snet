@@ -24,7 +24,7 @@ using namespace snet;
 #define EVENT_ARRAY_SIZE        1024
 
 sint64 _time = 11111111111l;
-int maxThread = 100;
+int maxThread = 10;
 int currentThread = 0;
 int threadId = 0;
 Lock lock;

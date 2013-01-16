@@ -9,6 +9,7 @@ namespace snet
     Lock::Lock(LockType type)
     {
         m_type = type;
+        m_init = false;
     }
     Lock::~Lock()
     {
@@ -94,5 +95,102 @@ namespace snet
     {
         if(!m_init) return -1;
         return pthread_cond_broadcast(&m_cond);
+    }
+    /////////////////////////////////////////////////////
+    //LockGuard
+    /////////////////////////////////////////////////////
+    LockGuard::LockGuard(Lock* lock)
+    {
+        m_lock = lock;
+        if(m_lock)m_lock->lock();
+    }
+    LockGuard::~LockGuard()
+    {
+        if(m_lock)m_lock->unlock();
+    }
+    
+    /////////////////////////////////////////////////////
+    //RWLock
+    //////////////////////////////////////////////////////
+    RWLock::RWLock(RWLockType type)
+    {
+        m_type = type;
+        m_init = false;
+    }
+    RWLock::~RWLock()
+    {
+        if(m_init)
+        {
+            pthread_rwlock_destroy(&m_lock);
+        }
+        m_init = false;
+    }
+    int RWLock::init()
+    {
+        if(m_init) return 0;
+        int res = -1;
+        pthread_rwlockattr_t attr;
+        res = pthread_rwlockattr_init(&attr);
+        if(res != 0)return res;
+        if(m_type == SharedRWLock)
+        {
+            res = pthread_rwlockattr_setpshared(&attr,PTHREAD_PROCESS_SHARED);
+        }
+        if(res != 0)return res;
+        res = pthread_rwlock_init(&m_lock,&attr);
+        if(res != 0) return res;
+        pthread_rwlockattr_destroy(&attr);
+        m_init = true;
+        return res;
+    }
+    int RWLock::rdlock()
+    {
+        if(!m_init)return -1;
+        return pthread_rwlock_rdlock(&m_lock);
+    }
+    int RWLock::tryRdlock()
+    {
+        if(!m_init) return -1;
+        return pthread_rwlock_tryrdlock(&m_lock);
+    }
+    int RWLock::wrlock()
+    {
+        if(!m_init)return -1;
+        return pthread_rwlock_wrlock(&m_lock);
+    }
+    int RWLock::tryWrlock()
+    {
+        if(!m_init)return -1;
+        return pthread_rwlock_trywrlock(&m_lock);
+    }
+    int RWLock::unlock()
+    {
+        if(!m_init)return -1;
+        return pthread_rwlock_unlock(&m_lock);
+    }
+    
+    /////////////////////////////////////////////
+    //RWLockRDGuard
+    /////////////////////////////////////////////
+    RWLockRDGuard::RWLockRDGuard(RWLock*lock)
+    {
+        m_lock = lock;
+        if(m_lock)m_lock->rdlock();
+    }
+    RWLockRDGuard::~RWLockRDGuard()
+    {
+        if(m_lock)m_lock->unlock();
+    }
+    ///////////////////////////////////////////////
+    //RWLockWRGuard
+    ///////////////////////////////////////////////
+    RWLockWRGuard::RWLockWRGuard(RWLock *lock)
+    {
+        m_lock = lock;
+        if(m_lock)m_lock->wrlock();
+    }
+    RWLockWRGuard::~RWLockWRGuard()
+    {
+        if(m_lock)m_lock->unlock();
     }
 }

@@ -13,8 +13,12 @@ namespace snet
         RecursiveLock,
         ErrorCheckLock
     };
+    enum RWLockType
+    {
+        SharedRWLock = 0,
+        PrivateRWLock
+    };
 
-    class Cond;
     class Lock
     {
     public:
@@ -27,7 +31,6 @@ namespace snet
         int wait(int time = 0);
         int signal();
         int signalAll();
-        friend class Connd;
     protected:
         pthread_mutex_t m_mutex;
         pthread_cond_t  m_cond;
@@ -35,16 +38,48 @@ namespace snet
         bool m_init;
     };
     
-    /*
+    class LockGuard
+    {
+    public:
+        LockGuard(Lock* lock);
+        ~LockGuard();
+    protected:
+        Lock* m_lock;
+    };
+    
     class RWLock
     {
     public:
-        RWLock(LockType type);
+        RWLock(RWLockType type);
         ~RWLock();
-        int rlock();
-        int wlock();
-        
-    };*/
+        int init();
+        int rdlock();
+        int tryRdlock();
+        int wrlock();
+        int tryWrlock();
+        int unlock();
+    protected:
+        RWLockType m_type;
+        pthread_rwlock_t m_lock;
+        bool m_init;
+    };
+    
+    class RWLockRDGuard
+    {
+    public:
+        RWLockRDGuard(RWLock *lock);
+        ~RWLockRDGuard();
+    protected:
+        RWLock *m_lock;
+    };
+    class RWLockWRGuard
+    {
+    public:
+        RWLockWRGuard(RWLock *lock);
+        ~RWLockWRGuard();
+    protected:
+        RWLock *m_lock;
+    };
     
     
 }
