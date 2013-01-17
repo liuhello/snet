@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <time.h>
 
+#include "misc.h"
+
 namespace snet
 {
     enum LockType
@@ -19,7 +21,7 @@ namespace snet
         PrivateRWLock
     };
 
-    class Lock
+    class Lock : private NonCopyable
     {
     public:
         Lock(LockType type = NormalLock);
@@ -47,7 +49,7 @@ namespace snet
         Lock* m_lock;
     };
     
-    class RWLock
+    class RWLock : private NonCopyable
     {
     public:
         RWLock(RWLockType type);

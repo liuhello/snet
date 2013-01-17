@@ -107,7 +107,7 @@ namespace snet
         return tmp;
     }
     
-    int ByteArrayOutputStream::write(char* buf,int size)
+    int ByteArrayOutputStream::write(const char* buf,int size)
     {
         if(!checkMemory(size)) return -1;
         char* tmp = m_buf + m_pos;
@@ -267,7 +267,7 @@ namespace snet
         return 8;
     }
     //write method
-    int ByteBuffer::write(char* buf,int size)
+    int ByteBuffer::write(const char* buf,int size)
     {
         if(!checkMemory(size)) return -1;
         memcpy(m_write,buf,size);

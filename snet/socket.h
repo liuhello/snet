@@ -10,9 +10,11 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include "misc.h"
+
 namespace snet
 {
-    class Socket
+    class Socket : private NonCopyable
     {
     public:
         Socket();

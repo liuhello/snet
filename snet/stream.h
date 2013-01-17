@@ -25,7 +25,7 @@ namespace snet
     class OutputStream
     {
     public:
-        virtual int write(char* buf,int size) = 0;
+        virtual int write(const char* buf,int size) = 0;
     };
     
     class DataOutputStream : public OutputStream
@@ -57,7 +57,7 @@ namespace snet
     public:
         ByteArrayOutputStream(int size = 512);
         ~ByteArrayOutputStream();
-        int write(char* buf,int size);
+        int write(const char* buf,int size);
         int writeByte(sint8 b);
         int writeShort(sint16 b);
         int writeInt(sint32 b);
@@ -85,7 +85,7 @@ namespace snet
         int readInt(sint32& v);
         int readLong(sint64& v);
         //wirte method
-        int write(char* buf,int size);
+        int write(const char* buf,int size);
         int writeByte(sint8 b);
         int writeShort(sint16 b);
         int writeInt(sint32 b);

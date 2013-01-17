@@ -12,13 +12,17 @@ LIBRARY=libsnet.a
 
 #OBJCS = stream.o
 
-all	: test_stream test_socket ${LIBRARY}
+all	: test_stream test_socket test_file ${LIBRARY}
 
 test_stream : test/test_stream.o ${LIBRARY}
 	${CXX} ${CCFLAGS} -o test_stream test/test_stream.o ${LIBRARY}
 
 test_socket : test/test_socket.o ${LIBRARY}
 	${CXX} ${CCFLAGS} -o test_socket test/test_socket.o ${LIBRARY}
+
+test_file : test/test_file.o ${LIBRARY}
+	${CXX} ${CCFLAGS} -o test_file test/test_file.o ${LIBRARY}
+	
 ${LIBRARY}: ${LIBOBJECTS}
 	rm -f $@
 	${AR} -rs $@ ${LIBOBJECTS}	
@@ -27,7 +31,7 @@ ${LIBRARY}: ${LIBOBJECTS}
 
 	
 clean : 
-	rm -rf *.o */*.o test_stream test_stream.exe* test_socket test_socket.exe* build_config.mk ${LIBRARY}
+	rm -rf *.o */*.o test_stream* test_socket* test_file* build_config.mk ${LIBRARY}
 
 
 

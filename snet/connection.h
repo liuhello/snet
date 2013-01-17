@@ -7,7 +7,7 @@
 
 namespace snet
 {
-    class Connection : public SocketEvent
+    class Connection : public SocketEvent , private NonCopyable
     {
     public:
         Connection(Socket* s);
@@ -22,7 +22,7 @@ namespace snet
         ByteBuffer* m_write;
     };
     
-    class ServerSocketEvent : public SocketEvent
+    class ServerSocketEvent : public SocketEvent , private NonCopyable
     {
     public:
         ServerSocketEvent(ServerSocket *ss,EventManager* manager):SocketEvent(ss),m_manager(manager){}

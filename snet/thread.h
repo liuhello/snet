@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#include "misc.h"
+
 namespace snet
 {
     enum
@@ -13,7 +15,7 @@ namespace snet
         ThreadRunning,
         ThreadStop
     };
-    class Thread
+    class Thread : private NonCopyable 
     {
     public:
         Thread();

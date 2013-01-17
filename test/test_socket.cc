@@ -22,6 +22,7 @@
 using namespace snet;
 
 #define EVENT_ARRAY_SIZE        1024
+#define BENCHMARK_TEST_SIZE     100
 
 sint64 _time = 11111111111l;
 int maxThread = 10;
@@ -241,21 +242,105 @@ protected:
 
 void testSocket()
 {
-    const int num = 10000;
     //TestThread th[num];
-    std::vector<TestThread*> threads;
-    for(int i = 0;i < num;i++)
-    {
-        TestThread *tptr = new TestThread;
-        threads.push_back(tptr);
-        tptr->start();
-    }
-    for(int i = 0;i < num;i++)
-    {
-        threads[i]->join();
+    //std::vector<TestThread*> threads;
+    //for(int i = 0;i < num;i++)
+    //{
+    //    TestThread *tptr = new TestThread;
+    //    threads.push_back(tptr);
+    //    tptr->start();
+    //}
+    //for(int i = 0;i < num;i++)
+    //{
+    //    threads[i]->join();
         //printf("thread %d exit\n",i);
-    }
+    //}
     
+    SocketEventManager eem;
+    assert(eem.init());
+    for(int i = 0;i < BENCHMARK_TEST_SIZE;i++)
+    {
+        Socket *s = new Socket;
+        s->setAddress("127.0.0.1",8888);
+        s->setReuseAddress(true);
+        s->setTimeout(timeout);
+        s->setTcpNoDelay(true);
+        bool res = s->connect();
+        assert(res);
+        Connection *conn = new Connection(s);
+        DataOutputStream *dos = conn->getWriteBuffer();
+        PingPacket pp;
+        pp.setTime(_time);
+        ByteArrayOutputStream os;
+        pp.write(&os);
+        char *buf = os.toByte();
+        dos->writeInt(os.len());
+        dos->write(buf,os.len());
+        delete[] buf;
+        eem.addEvent(conn,true,true);
+    }
+    Event **se = new Event*[EVENT_ARRAY_SIZE];
+    while(true)
+    {
+        int count = eem.getEvent(-1,se,EVENT_ARRAY_SIZE);
+        //printf("get %d event from event manager.\n",count);
+        assert(count >= 0);
+        for(int i = 0;i < count;i++)
+        {
+            SocketEvent *septr = (SocketEvent*)se[i];
+            if(septr->isWrite())
+            {
+                if(!septr->handleWrite())
+                {
+                    eem.removeEvent(septr);
+                    //printf("socket : %s handle write failed close it.\n",septr->getSocket()->getAddress().c_str());
+                    delete septr;
+                    continue;
+                }
+                if(!septr->isServerSocket())
+                {
+                    Connection* conn = (Connection*)septr;
+                    ByteBuffer *bb = conn->getWriteBuffer();
+                    if(bb->len() <= 0)
+                    {
+                        eem.updateEvent(conn,true,false);
+                    }
+                }
+            }
+            if(septr->isRead())
+            {
+                if(!septr->handleRead())
+                {
+                    eem.removeEvent(septr);
+                    //printf("socket : %s hanlde read failed close it.\n",septr->getSocket()->getAddress().c_str());
+                    delete septr;
+                    continue;
+                }
+            }
+            if(septr->hasError())
+            {
+                eem.removeEvent(septr);
+                printf("socket : %s hasError close it.\n",septr->getSocket()->getAddress().c_str());
+                printf("errno : %d error str: %s\n",errno,strerror(errno));
+                delete septr;
+                continue;
+            }
+            if(!septr->isServerSocket())
+            {
+                Connection* conn = (Connection*)septr;
+                ByteBuffer *bb = conn->getReadBuffer();
+                if(bb->len() > 0)
+                {
+                    int len = bb->len();
+                    char* tmp = new char[len];
+                    assert(bb->read(tmp,len) == len);
+                    bb = conn->getWriteBuffer();
+                    assert(bb->write(tmp,len) == len);
+                    eem.updateEvent(conn,true,true);
+                }
+            }
+        }
+    }
 }
 
 int main(int argc,char** argv)

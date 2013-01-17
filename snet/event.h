@@ -5,6 +5,7 @@
 #include <map>
 
 #include "socket.h"
+#include "misc.h"
 
 #ifndef __EVENT_H__
 #define __EVENT_H__
@@ -42,7 +43,7 @@ namespace snet
         virtual int getEvent(int timeout,Event** e,int cnt) = 0;
     };
     
-    class SocketEventManager : public EventManager
+    class SocketEventManager : public EventManager , private NonCopyable
     {
     public:
         SocketEventManager();
