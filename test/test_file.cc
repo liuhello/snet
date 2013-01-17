@@ -17,6 +17,7 @@ int main(int argc,char** argv)
     char buf[1024];
     int len = f.read(buf,1024);
     assert(len == test.size());
-    assert(f.remove() == 0);
+    assert(f.remove());
+    assert(f.remove());
     assert(!f.exist());
 }
